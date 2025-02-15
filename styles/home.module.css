@@ -1,0 +1,32 @@
+.section {
+    padding-top: 3.5rem;
+    column-gap: 2rem;
+    grid-template-columns: repeat(2, 1fr);
+    display: grid;   
+    text-align: center;
+    gap: 1.5rem;
+}
+.section div {
+    display: block;
+    unicode-bidi: isolate;
+    padding-top: 5.5rem;
+    column-gap: 2rem;
+    grid-column: initial;
+    text-align:center;
+}
+.section h1{
+    margin-bottom : 0.8rem;
+}
+.section h3{
+    margin-bottom : 0.8rem;
+}
+.section p{
+    margin-bottom : 0.8rem;
+}
+.button {
+    display: inline-block;
+    background-color: hsl(190, 69%, 61%);
+    color: #fff;
+    padding: 1rem;
+    border-radius: .5rem;
+}
