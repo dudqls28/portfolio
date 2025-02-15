@@ -177,7 +177,7 @@ const MacDesktop: React.FC = () => {
         >
           <div className="flex items-center space-x-2 window-controls">
             <button 
-              onClick={(e) => {
+              onMouseDown={(e) => {
                 console.log(e);
                 e.preventDefault();
                 e.stopPropagation();
@@ -186,7 +186,7 @@ const MacDesktop: React.FC = () => {
               className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors"
             />
             <button 
-              onClick={(e) => {
+              onMouseDown={(e) => {
                 console.log(e);
                 e.preventDefault();
                 e.stopPropagation();
