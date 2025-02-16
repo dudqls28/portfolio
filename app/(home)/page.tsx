@@ -38,7 +38,7 @@ const LoadingScreen: React.FC<{ progress: number }> = ({ progress }) => {
         />
       </div>
       <div className="text-gray-400 mt-4">
-        Loading your space...
+        Loading been space...
       </div>
     </div>
   );
@@ -67,22 +67,23 @@ const MacDesktop: React.FC = () => {
     { id: 'settings', icon: <Settings size={32} />, label: 'Settings', title: 'Preferences' },
     { id: 'browser', icon: <Chrome size={32} />, label: 'Links', title: 'Been\'s Links' }
   ];
-
+  /* 로딩바 */
   useEffect(() => {
     const timer = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) {
           clearInterval(timer);
           setTimeout(() => setLoading(false), 500);
+          handleWindowOpen('home');
           return 100;
         }
         return prev + 2;
       });
     }, 50);
-
+    /*unmount시 타임클리어어 */
     return () => clearInterval(timer);
   }, []);
-
+  /*시간체크 */
   useEffect(() => {
     const timer = setInterval(() => {
       const date = new Date();
@@ -91,10 +92,10 @@ const MacDesktop: React.FC = () => {
         minute: '2-digit'
       }));
     }, 1000);
-
+    /*unmount시 타임클리어어 */
     return () => clearInterval(timer);
   }, []);
-
+  /* 화면 오픈 이벤트 */
   const handleWindowOpen = (id: string) => {
     setWindows(prev => {
       const existingWindow = prev.find(w => w.id === id);
@@ -105,32 +106,39 @@ const MacDesktop: React.FC = () => {
           w.id === id ? { ...w, isOpen: true, isMinimized: false, zIndex: newZIndex } : w
         );
       }
+
+      // 화면 중앙 위치 계산
+      const windowWidth = window.innerWidth * 0.75; // 윈도우 너비 (w-3/4)
+      const windowHeight = window.innerHeight * 0.75; // 윈도우 높이 (h-3/4)
+      const centerX = (window.innerWidth - windowWidth) / 2;
+      const centerY = (window.innerHeight - windowHeight) / 2;
+
       const newZIndex = maxZIndex + 1;
       setMaxZIndex(newZIndex);
       return [...prev, { 
         id, 
         isOpen: true, 
         isMinimized: false,
-        position: { x: 50, y: 50 },
+        position: { x: centerX, y: centerY },
         zIndex: newZIndex
       }];
     });
   };
-
+  /** 화면 종료 이벤트 */
   const handleWindowClose = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     setWindows(prev => prev.map(w => 
       w.id === id ? { ...w, isOpen: false } : w
     ));
   };
-
+  /** 화면 최소화 이벤트트 */
   const handleWindowMinimize = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     setWindows(prev => prev.map(w => 
       w.id === id ? { ...w, isMinimized: !w.isMinimized } : w
     ));
   };
-
+  /** 드래그 이벤트 클릭 시  */
   const handleMouseDown = (e: React.MouseEvent, id: string) => {
     if ((e.target as HTMLElement).closest('.window-controls')) {
       return;
@@ -152,7 +160,7 @@ const MacDesktop: React.FC = () => {
       startOffset: window.position
     });
   };
-
+  /** 마우스 이동 이벤트 */
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!dragState.isDragging || !dragState.windowId) return;
 
@@ -171,7 +179,7 @@ const MacDesktop: React.FC = () => {
         : w
     ));
   };
-
+ 
   const handleMouseUp = () => {
     setDragState({
       isDragging: false,
@@ -263,7 +271,7 @@ const MacDesktop: React.FC = () => {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
       >
-        {/* 산 모양의 배경 요소 */}
+        {/* 그라데이션 배경 요소 */}
         <div 
           className="absolute bottom-0 left-0 w-full h-2/3 opacity-30"
           style={{
