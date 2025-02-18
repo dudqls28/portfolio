@@ -1,6 +1,6 @@
 "use client"
-import React, { useState, useEffect } from 'react';
-import { Home, User, Code, FolderGit2, Mail, Settings, Chrome } from 'lucide-react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
+import { Home, User, Code, FolderGit2, Mail, Settings, Chrome, Clock, Zap } from 'lucide-react';
 import "tailwindcss";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -9,6 +9,8 @@ import AboutSection from '../../components/aboutSection';
 import SkiilsSection from '../../components/skillsSection';
 import ProjectsSection from '../../components/projectsSection';
 import ContactSection from '../../components/contactSection';
+import SkillsSection from '../../components/skillsSection';
+import TimelineSection from '../../components/timelineSection';
 
 interface DockItem {
   id: string;
@@ -70,9 +72,8 @@ const MacDesktop: React.FC = () => {
     { id: 'about', icon: <User size={32} />, label: 'About', title: 'About Been' },
     { id: 'skills', icon: <Code size={32} />, label: 'Skills', title: 'Been\'s Skills' },
     { id: 'projects', icon: <FolderGit2 size={32} />, label: 'Projects', title: 'Been\'s Projects' },
-    { id: 'contact', icon: <Mail size={32} />, label: 'Contact', title: 'Contact Been' }
-    // { id: 'settings', icon: <Settings size={32} />, label: 'Settings', title: 'Preferences' },
-    // { id: 'browser', icon: <Chrome size={32} />, label: 'Links', title: 'Been\'s Links' }
+    { id: 'contact', icon: <Mail size={32} />, label: 'Contact', title: 'Contact Been' },
+    { id: 'timeline', icon: <Clock size={32} />, label: 'Timeline', title: 'My Journey' }
   ];
   /* 로딩바 */
   useEffect(() => {
@@ -156,30 +157,36 @@ const MacDesktop: React.FC = () => {
       w.id === id ? { ...w, isMinimized: !w.isMinimized } : w
     ));
   };
-  /** 드래그 이벤트 클릭 시  */
-  const handleMouseDown = (e: React.MouseEvent, id: string) => {
-    if ((e.target as HTMLElement).closest('.window-controls')) {
+  // Dock hover 핸들러 메모이제이션
+  const handleDockHover = useCallback((id: string | null) => {
+    setHoveredDockItem(id);
+  }, []);
+
+  // 드래그 이벤트 핸들러 메모이제이션
+  const handleMouseDown = useCallback((e: React.MouseEvent, id: string) => {
+    if ((e.target as HTMLElement).closest('.window-controls') || 
+        (e.target as HTMLElement).tagName === 'BUTTON') {
       return;
     }
-  
+
     const window = windows.find(w => w.id === id);
     if (!window) return;
-  
+
     const newZIndex = maxZIndex + 1;
     setMaxZIndex(newZIndex);
     setWindows(prev => prev.map(w => 
       w.id === id ? { ...w, zIndex: newZIndex } : w
     ));
-  
+
     setDragState({
       isDragging: true,
       windowId: id,
       startPos: { x: e.clientX, y: e.clientY },
       startOffset: window.position
     });
-  };
-  /** 마우스 이동 이벤트 */
-  const handleMouseMove = (e: React.MouseEvent) => {
+  }, [windows, maxZIndex]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!dragState.isDragging || !dragState.windowId) return;
 
     const deltaX = e.clientX - dragState.startPos.x;
@@ -196,18 +203,20 @@ const MacDesktop: React.FC = () => {
           }
         : w
     ));
-  };
- 
-  const handleMouseUp = () => {
-    setDragState({
-      isDragging: false,
-      windowId: null,
-      startPos: { x: 0, y: 0 },
-      startOffset: { x: 0, y: 0 }
-    });
-  };
+  }, [dragState]);
 
-  const Window: React.FC<{ id: string; title: string; }> = ({ id, title }) => {
+  const handleMouseUp = useCallback(() => {
+    if (dragState.isDragging) {
+      setDragState({
+        isDragging: false,
+        windowId: null,
+        startPos: { x: 0, y: 0 },
+        startOffset: { x: 0, y: 0 }
+      });
+    }
+  }, [dragState.isDragging]);
+
+  const Window = memo(({ id, title }: { id: string; title: string }) => {
     const window = windows.find(w => w.id === id);
     if (!window?.isOpen) return null;
 
@@ -224,9 +233,9 @@ const MacDesktop: React.FC = () => {
           transform: `translate3d(${window.position.x}px, ${window.position.y}px, 0)`,
           zIndex: window.zIndex,
         }}
-        onMouseDown={(e) => handleMouseDown(e, id)}
       >
-        <div className="h-8 bg-gradient-to-r from-gray-100 to-gray-200 rounded-t-lg flex items-center justify-between px-4 cursor-move">
+        <div className="h-8 bg-gradient-to-r from-gray-100 to-gray-200 rounded-t-lg flex items-center justify-between px-4 cursor-move" 
+        onMouseDown={(e) => handleMouseDown(e, id)}>
           <div className="flex items-center space-x-2 window-controls">
             <button 
               onMouseDown={(e) => handleWindowClose(e, id)}
@@ -251,19 +260,21 @@ const MacDesktop: React.FC = () => {
           transition-all duration-500 ease-in-out
           ${window.isMinimized ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}
         `}>
-           {id === 'home' && <HomeSection />}
+           {id === 'home' && <HomeSection onOpenSection={handleWindowOpen} />}
 
           {id === 'about' && <AboutSection />}
 
-          {id === 'skills' && <SkiilsSection />}
+          {id === 'skills' && <SkillsSection isWindowOpen={window.isOpen} />}
 
           {id === 'projects' && <ProjectsSection />}
 
           {id === 'contact' && <ContactSection />}
+          
+          {id === 'timeline' && <TimelineSection />}
         </div>
       </div>
     );
-  };
+  });
 
   return (
     <>
@@ -333,8 +344,8 @@ const MacDesktop: React.FC = () => {
             <div
               key={item.id}
               className="relative group"
-              onMouseEnter={() => setHoveredDockItem(item.id)}
-              onMouseLeave={() => setHoveredDockItem(null)}
+              onMouseEnter={() => handleDockHover(item.id)}
+              onMouseLeave={() => handleDockHover(null)}
               onClick={() => handleWindowOpen(item.id)}
             >
               <div 
@@ -361,4 +372,4 @@ const MacDesktop: React.FC = () => {
   );
 };
 
-export default MacDesktop;
+export default memo(MacDesktop);

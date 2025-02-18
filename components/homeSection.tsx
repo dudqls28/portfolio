@@ -1,7 +1,11 @@
 import React from 'react';
 import { Code, Users, Briefcase, Award } from 'lucide-react';
 
-const HomeSection: React.FC = () => {
+interface HomeSectionProps {
+    onOpenSection: (sectionId: string) => void;
+}
+
+const HomeSection: React.FC<HomeSectionProps> = ({ onOpenSection }) => {
     return (
         <div className="space-y-8">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
@@ -87,10 +91,14 @@ const HomeSection: React.FC = () => {
                 </div>
             </div>
             <div className="flex space-x-4">
-                <button className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:opacity-90 transition-opacity">
+                <button 
+                    onClick={() => onOpenSection('projects')}
+                    className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:opacity-90 transition-opacity">
                 프로젝트 보기
                 </button>
-                <button className="px-6 py-2 border-2 border-purple-500 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors">
+                <button 
+                    onClick={() => onOpenSection('contact')}
+                    className="px-6 py-2 border-2 border-purple-500 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors">
                 연락하기
                 </button>
             </div>
